@@ -21,4 +21,7 @@ The program takes a command-line argument with the example data sets provided in
     ```
 
 If no argument is given the default data set will be p2p-Gnutella08-mod.txt.
- 
+
+### Runtimes 
+
+Expect some long runtimes for the random surf on the huge graphs, especially bigRandom.txt. Execution time on Windows with AMD Ryzen 5 5600U/8GB RAM took 30 seconds.

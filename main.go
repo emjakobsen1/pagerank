@@ -69,14 +69,21 @@ func main() {
 		log.Fatalf("Error reading file: %s", err)
 	}
 
-	nodesCount := len(graph) // Number of unique nodes
+	addDanglingNodes(graph)
 
-	// Print the size of the graph
+	nodesCount := len(graph)
+
 	fmt.Printf("Graph order: %d nodes, size: %d edges\n\n", nodesCount, edgeCount)
 
-	addDanglingNodes(graph)
-	/* Sets the graph, damping factor and how many steps the walk is. */
-	//randomSurf(graph, 0.15, 10000)
+	/* Used to check the time running the algorithms. */
+	start := time.Now().UnixNano()
+
+	/* Sets the graph, damping factor and how many steps the walk is for the random surf. */
+	randomSurf(graph, 0.15, 100000000)
+
+	duration := float64(time.Now().UnixNano()-start) / 1e6
+	fmt.Printf("Time:	%.3f milliseconds\n", duration)
+
 	pageRank(graph, nodesCount, edgeCount)
 
 	reversedGraph := make(map[int][]int)
@@ -86,6 +93,34 @@ func main() {
 		}
 	}
 
+}
+
+/* Function to sort map int -> int by its values */
+func sortMapsByValueSize(m map[int]int) []int {
+	keys := make([]int, 0, len(m))
+	for key := range m {
+		keys = append(keys, key)
+	}
+
+	sort.SliceStable(keys, func(i, j int) bool {
+		return m[keys[i]] > m[keys[j]]
+	})
+
+	return keys
+}
+
+func addDanglingNodes(m map[int][]int) {
+	maxNode := -1
+	for node := range m {
+		if node > maxNode {
+			maxNode = node
+		}
+	}
+	for i := 0; i <= maxNode; i++ {
+		if _, exists := m[i]; !exists {
+			m[i] = []int{}
+		}
+	}
 }
 
 func randomSurf(graph map[int][]int, m float64, totalSteps int) {
@@ -125,37 +160,9 @@ func randomSurf(graph map[int][]int, m float64, totalSteps int) {
 		if i >= 10 {
 			break
 		}
-		fmt.Printf("%d		%d		%d\n", i, key, randomSurferMap[key])
+		fmt.Printf("%d		%d		%d\n", i+1, key, randomSurferMap[key])
 	}
 	fmt.Println()
-}
-
-/* Function to sort map int -> int by its values */
-func sortMapsByValueSize(m map[int]int) []int {
-	keys := make([]int, 0, len(m))
-	for key := range m {
-		keys = append(keys, key)
-	}
-
-	sort.SliceStable(keys, func(i, j int) bool {
-		return m[keys[i]] > m[keys[j]]
-	})
-
-	return keys
-}
-
-func addDanglingNodes(m map[int][]int) {
-	maxNode := -1
-	for node := range m {
-		if node > maxNode {
-			maxNode = node
-		}
-	}
-	for i := 0; i <= maxNode; i++ {
-		if _, exists := m[i]; !exists {
-			m[i] = []int{}
-		}
-	}
 }
 
 func pageRank(graph map[int][]int, order int, size int) {
