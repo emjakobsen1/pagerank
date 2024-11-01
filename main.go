@@ -74,6 +74,7 @@ func main() {
 	// Print the size of the graph
 	fmt.Printf("Graph order: %d nodes, size: %d edges\n\n", nodesCount, edgeCount)
 
+	addDanglingNodes(graph)
 	/* Sets the graph, damping factor and how many steps the walk is. */
 	//randomSurf(graph, 0.15, 10000)
 	pageRank(graph, nodesCount, edgeCount)
@@ -129,7 +130,7 @@ func randomSurf(graph map[int][]int, m float64, totalSteps int) {
 	fmt.Println()
 }
 
-/* Function to sort a map by its values */
+/* Function to sort map int -> int by its values */
 func sortMapsByValueSize(m map[int]int) []int {
 	keys := make([]int, 0, len(m))
 	for key := range m {
@@ -143,8 +144,23 @@ func sortMapsByValueSize(m map[int]int) []int {
 	return keys
 }
 
+func addDanglingNodes(m map[int][]int) {
+	maxNode := -1
+	for node := range m {
+		if node > maxNode {
+			maxNode = node
+		}
+	}
+	for i := 0; i <= maxNode; i++ {
+		if _, exists := m[i]; !exists {
+			m[i] = []int{}
+		}
+	}
+}
+
 func pageRank(graph map[int][]int, order int, size int) {
 
+	/*Setup. Find branching factors, danglingNodes and reverse the graph. */
 	branching := make(map[int]int)
 	danglingNodes := []int{}
 	for node, adjNodes := range graph {
@@ -154,8 +170,11 @@ func pageRank(graph map[int][]int, order int, size int) {
 			branching[node] = len(adjNodes)
 		}
 	}
-	fmt.Printf("dangling nodes: %d", danglingNodes)
-	fmt.Printf("branching: %d", branching)
+	sort.Slice(danglingNodes, func(i, j int) bool {
+		return danglingNodes[i] > danglingNodes[j]
+	})
+
+	//fmt.Printf("dangling nodes (sorted): %d", danglingNodes)
 
 	reversedGraph := make(map[int][]int)
 	for node, adjNodes := range graph {
