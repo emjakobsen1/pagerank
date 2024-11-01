@@ -25,7 +25,7 @@ func main() {
 		filename = os.Args[1]
 	}
 
-	file, err := os.Open("PageRankExampleData/" + filename)
+	file, err := os.Open(filename)
 	if err != nil {
 		log.Fatalf("Failed to open file: %s", err)
 	}

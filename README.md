@@ -7,6 +7,7 @@ This is a demonstration/implementation of the PageRank algorithm, which contribu
 You will need the Go programming language to run this program:
 
 - [Go Programming Language](https://go.dev/doc/install)
+- You will need to have whichever dataset.txt to test against in the same folder as main.go for the program to handle it.
 
 ### How to run 
 
