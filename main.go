@@ -79,13 +79,14 @@ func main() {
 	start := time.Now().UnixNano()
 
 	/* Sets the graph, damping factor and how many steps the walk is for the random surf. */
-	randomSurf(graph, 0.15, 1000)
+	randomSurf(graph, 0.15, 100000)
 
 	duration := float64(time.Now().UnixNano()-start) / 1e6
 	fmt.Printf("Time:	%.3f milliseconds\n", duration)
 
 	start = time.Now().UnixNano()
 
+	/* Sets the graph, order, size and iterative steps to calculate the rankings. */
 	pageRank(graph, nodesCount, edgeCount, 10)
 
 	duration = float64(time.Now().UnixNano()-start) / 1e6
@@ -183,29 +184,29 @@ func pageRank(graph map[int][]int, order int, size int, iterations int) {
 			reversedGraph[adjNode] = append(reversedGraph[adjNode], node)
 		}
 	}
-	n := order
-	x := make([]float64, n)
+	/* Starts with x_0 having all entries to 1/n */
+	x := make([]float64, order)
 	for i := range x {
-		x[i] = 1.0 / float64(n)
+		x[i] = 1.0 / float64(order)
 	}
 
-	danglingContribution := 0.15 * (1.0 / float64(n)) * float64(len(danglingNodes))
+	D := 0.15 * (1.0 / float64(order)) * float64(len(danglingNodes))
 
 	for iteration := 0; iteration < iterations; iteration++ {
 
-		xNext := make([]float64, n)
+		xNext := make([]float64, order)
 
-		for i := 0; i < n; i++ {
+		for i := 0; i < order; i++ {
 
-			xNext[i] = 0.15 * (1.0 / float64(n))
-			xNext[i] += danglingContribution
+			xNext[i] = 0.15 * (1.0 / float64(order))
+			xNext[i] += D
 
-			backlinkSum := 0.0
+			A := 0.0
 
 			for _, backlink := range reversedGraph[i] {
-				backlinkSum += x[backlink] / float64(branching[backlink])
+				A += x[backlink] / float64(branching[backlink])
 			}
-			xNext[i] += backlinkSum
+			xNext[i] += A
 		}
 		copy(x, xNext)
 	}
@@ -227,5 +228,4 @@ func pageRank(graph map[int][]int, order int, size int, iterations int) {
 		node := rankedNodes[i]
 		fmt.Printf("%d		%d		 %f\n", i+1, node, x[node])
 	}
-
 }
