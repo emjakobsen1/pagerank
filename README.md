@@ -11,7 +11,7 @@ You will need the Go programming language to run this program:
 
 ### How to run 
 
-The program takes a command-line argument with the example data sets provided in /PageRankExampleData.
+The program takes a command-line argument with datasets on graphs adhering to the format provided in PageRankExampleData.
 
 1. From the repository root, run `main.go` and the file name. Examples 
 
@@ -24,4 +24,4 @@ If no argument is given the default data set will be p2p-Gnutella08-mod.txt.
 
 ### Runtimes 
 
-Expect some long runtimes for the random surf on the huge graphs, especially bigRandom.txt. Execution time on Windows with AMD Ryzen 5 5600U/8GB RAM took 30 seconds.
+Expect some long runtimes on the huge graphs, especially bigRandom.txt. Execution time with 1 million steps on Windows with AMD Ryzen 5 5600U/8GB RAM took 30 seconds.

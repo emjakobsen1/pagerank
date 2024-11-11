@@ -79,20 +79,17 @@ func main() {
 	start := time.Now().UnixNano()
 
 	/* Sets the graph, damping factor and how many steps the walk is for the random surf. */
-	randomSurf(graph, 0.15, 100000000)
+	randomSurf(graph, 0.15, 1000)
 
 	duration := float64(time.Now().UnixNano()-start) / 1e6
 	fmt.Printf("Time:	%.3f milliseconds\n", duration)
 
-	pageRank(graph, nodesCount, edgeCount)
+	start = time.Now().UnixNano()
 
-	reversedGraph := make(map[int][]int)
-	for node, adjNodes := range graph {
-		for _, adjNode := range adjNodes {
-			reversedGraph[adjNode] = append(reversedGraph[adjNode], node)
-		}
-	}
+	pageRank(graph, nodesCount, edgeCount, 10)
 
+	duration = float64(time.Now().UnixNano()-start) / 1e6
+	fmt.Printf("Time:	%.3f milliseconds\n", duration)
 }
 
 /* Function to sort map int -> int by its values */
@@ -162,12 +159,11 @@ func randomSurf(graph map[int][]int, m float64, totalSteps int) {
 		}
 		fmt.Printf("%d		%d		%d\n", i+1, key, randomSurferMap[key])
 	}
-	fmt.Println()
 }
 
-func pageRank(graph map[int][]int, order int, size int) {
+func pageRank(graph map[int][]int, order int, size int, iterations int) {
 
-	/*Setup. Find branching factors, danglingNodes and reverse the graph. */
+	/* 	Setup. Find branching factors, dangling nodes and reverse the graph. */
 	branching := make(map[int]int)
 	danglingNodes := []int{}
 	for node, adjNodes := range graph {
@@ -181,13 +177,55 @@ func pageRank(graph map[int][]int, order int, size int) {
 		return danglingNodes[i] > danglingNodes[j]
 	})
 
-	//fmt.Printf("dangling nodes (sorted): %d", danglingNodes)
-
 	reversedGraph := make(map[int][]int)
 	for node, adjNodes := range graph {
 		for _, adjNode := range adjNodes {
 			reversedGraph[adjNode] = append(reversedGraph[adjNode], node)
 		}
+	}
+	n := order
+	x := make([]float64, n)
+	for i := range x {
+		x[i] = 1.0 / float64(n)
+	}
+
+	danglingContribution := 0.15 * (1.0 / float64(n)) * float64(len(danglingNodes))
+
+	for iteration := 0; iteration < iterations; iteration++ {
+
+		xNext := make([]float64, n)
+
+		for i := 0; i < n; i++ {
+
+			xNext[i] = 0.15 * (1.0 / float64(n))
+			xNext[i] += danglingContribution
+
+			backlinkSum := 0.0
+
+			for _, backlink := range reversedGraph[i] {
+				backlinkSum += x[backlink] / float64(branching[backlink])
+			}
+			xNext[i] += backlinkSum
+		}
+		copy(x, xNext)
+	}
+
+	rankedNodes := make([]int, len(x))
+	for i := range x {
+		rankedNodes[i] = i
+	}
+
+	sort.SliceStable(rankedNodes, func(i, j int) bool {
+		return x[rankedNodes[i]] > x[rankedNodes[j]]
+	})
+
+	fmt.Println()
+	fmt.Printf("====== Page Rank Top 10 ======\n")
+	fmt.Printf("m: %f, iterations: %d \n\n", 0.15, iterations)
+	fmt.Printf("Rank:		Node:		Score:\n")
+	for i := 0; i < 10 && i < len(x); i++ {
+		node := rankedNodes[i]
+		fmt.Printf("%d		%d		 %f\n", i+1, node, x[node])
 	}
 
 }
